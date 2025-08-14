@@ -12,10 +12,10 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["EClaim.API/EClaim.API.csproj", "EClaim.API/"]
-RUN dotnet restore "./E-Claim-Service/EClaim.API.csproj"
+COPY ["EClaim.API.csproj", "."]
+RUN dotnet restore "./EClaim.API.csproj"
 COPY . .
-WORKDIR "/src/E-Claim-Service"
+WORKDIR "/src/E-Claim-Service/EClaim.API"
 RUN dotnet build "./EClaim.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
