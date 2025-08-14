@@ -1,0 +1,130 @@
+﻿@model EClaim.Application.Models.Response.ClaimRequestResponse
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var user = HttpContextAccessor.HttpContext.User;
+    ViewData["Title"] = "Claim Details";
+}
+
+<h4>Claim Details</h4>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.User.FullName)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.User.FullName)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Id)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.ClaimType)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ClaimType)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Documents)
+        </dt>
+        <dd class="col-sm-10">
+            <ul>
+                @foreach (var doc in Model.Documents)
+                {
+                    <li>
+                        <a href="@doc.FilePath" target="_blank">@doc.FileName</a>
+                    </li>
+                }
+            </ul>
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.WorkflowSteps)
+        </dt>
+        <dt>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.WorkflowSteps.FirstOrDefault().Comments)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.WorkflowSteps.FirstOrDefault().CreatedAt)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.WorkflowSteps.FirstOrDefault().Action)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.WorkflowSteps.FirstOrDefault().User)
+                        </th>
+                        <th>
+                            @Html.DisplayName("User Type")
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var flow in Model.WorkflowSteps)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => flow.Comments)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => flow.CreatedAt)
+                            </td>
+                            <td>
+                                @Utility.GetDisplayName(flow.Action)
+                            </td>
+                            <td>
+                                @if (flow.User != null)
+                                {
+                                    @Html.DisplayFor(modelItem => flow.User.FullName)
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (flow.User != null)
+                                {
+                                    @Utility.GetDisplayName(flow.User.Role)
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </dt>
+    </dl>
+</div>
+<div>
+     @if (User.Identity.IsAuthenticated && (user.IsInRole("Adjuster") || user.IsInRole("Approver")))
+    {
+        <a asp-action="Search">Claim Search</a>
+    }
+    else
+    {
+        <a asp-action="Index">Submit New Claim</a>
+    }
+</div>

@@ -1,0 +1,35 @@
+﻿@using EClaim.Application.Models.ViewModel
+@model ClaimSubmissionViewModel
+
+@{
+    ViewData["Title"] = "Submit Claim";
+}
+
+<h2>Submit a Claim</h2>
+
+<form asp-action="Submit" asp-controller="Claims" enctype="multipart/form-data" method="post">
+    <div class="form-group">
+        <label asp-for="ClaimType"></label>
+        <input asp-for="ClaimType" class="form-control" />
+        <span asp-validation-for="ClaimType" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Documents">Upload Documents</label>
+        <input asp-for="Documents" type="file" multiple class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit Claim</button>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
