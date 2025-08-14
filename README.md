@@ -92,11 +92,15 @@ You need to share the code (without DLLs) on SharePoint and share the link accor
 - Step 1 : Open the **E-Claim\E-Claim-Service\E-Claim-Service.sln** file in VS.
 - Step 2 : Open the **E-Claim\EClaim.Application\EClaim.Application.sln** file in VS.
 - Step 4 : Update database connection string in "appsettings.json" file.
-         **"ConnectionStrings": {
-              "DefaultConnection": "Server=IN-9VM5494;Database=EClaimAppDb;Trusted_Connection=True;TrustServerCertificate=True;"
-         }**
+
+         "ConnectionStrings": {
+              "DefaultConnection": "Server=<Server_Name>;Database=<Database_Name>;User ID=<User_Id>;Password=&lt;Password&gt;TrustServerCertificate=True;"
+         }
 - Step 5 : Build the both application.
 - Step 6 : Open the CMD propemt in base folder **E-Claim\E-Claim-Service**.
 - Step 7 : For migration execute the below command.
-         **dotnet ef migrations add <Migration-Name> -p EClaim.Infrastructure -s EClaim.API** command for Create migration.
-         **dotnet ef database update -p EClaim.Infrastructure -s EClaim.API**  command for update database as per migration.
+
+         dotnet ef migrations add <Migration-Name> -p EClaim.Infrastructure -s EClaim.API //command for Create migration.
+         dotnet ef database update -p EClaim.Infrastructure -s EClaim.API  //command for update database as per migration.
+
+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

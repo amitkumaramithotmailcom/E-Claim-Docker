@@ -12,19 +12,19 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["EClaim.API/EClaim.API.cspro", "EClaim.API/"]
-RUN dotnet restore "./E-Claim-Service/EClaim.API.cspro"
+COPY ["EClaim.Application/EClaim.Application.csproj", "EClaim.Application/"]
+RUN dotnet restore "./EClaim.Application/EClaim.Application.csproj"
 COPY . .
-WORKDIR "/src/E-Claim-Service"
-RUN dotnet build "./EClaim.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/EClaim.Application"
+RUN dotnet build "./EClaim.Application.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./EClaim.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./EClaim.Application.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "EClaim.API.dll"]
+ENTRYPOINT ["dotnet", "EClaim.Application.dll"]
