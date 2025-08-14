@@ -12,8 +12,8 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["EClaim.API/EClaim.API.cspro", "EClaim.API/"]
-RUN dotnet restore "./E-Claim-Service/EClaim.API.cspro"
+COPY ["EClaim.API/EClaim.API.csproj", "EClaim.API/"]
+RUN dotnet restore "./E-Claim-Service/EClaim.API.csproj"
 COPY . .
 WORKDIR "/src/E-Claim-Service"
 RUN dotnet build "./EClaim.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
