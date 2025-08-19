@@ -2,6 +2,7 @@ using E_Claim_Service;
 using EClaim.Domain.Interfaces;
 using EClaim.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +34,12 @@ builder.Logging.ClearProviders()
                .AddConsole()
                .AddProvider(new DbLoggerProvider(scopeFactory));
 
+// Register Redis connection multiplexer
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var configuration = builder.Configuration.GetConnectionString("Redis");
+    return ConnectionMultiplexer.Connect(configuration);
+});
 
 var app = builder.Build();
 
