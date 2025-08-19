@@ -1,7 +1,9 @@
 version: "3.9"
 services:
   api:
-    build: ./EClaim.API
+    build: 
+      context: .
+      dockerfile: EClaim.API/Dockerfile
     container_name: eclaim_api
     ports:
       - "5000:80"
