@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   api:
     build: 
@@ -9,12 +8,25 @@ services:
       - "5000:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__Redis=redis:6379,abortConnect=false
+      - ConnectionStrings__Redis=redis:6379,abortConnect=false,connectTimeout=15000
     depends_on:
       - redis
+    networks:
+      - eclaimnet
 
   redis:
-    image: redis:latest
+    image: redis:7
     container_name: redis
+    restart: always
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - eclaimnet
+
+networks:
+  eclaimnet:
+
+volumes:
+  redis_data:
