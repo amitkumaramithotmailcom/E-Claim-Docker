@@ -5,6 +5,7 @@ using EClaim.Domain.Interfaces;
 using EClaim.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using System.Text;
 using System.Text.Json;
@@ -16,31 +17,32 @@ namespace E_Claim_Service.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IAppSettingsService _appSettingsService;
+        private readonly ICacheUtility _cacheUtility;
         private readonly ILogger<AuthController> _logger;
         private readonly IDatabase _cache;
 
-        public UsersController(IUserService userService, ILogger<AuthController> logger, IConnectionMultiplexer redis)
+        public UsersController(IUserService userService, IAppSettingsService appSettingsService, ILogger<AuthController> logger, IConnectionMultiplexer redis, ICacheUtility cacheUtility)
         {
             _userService = userService;
+            _appSettingsService = appSettingsService;
             _logger = logger;
             _cache = redis.GetDatabase();
+            _cacheUtility = cacheUtility;
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
             _logger.LogInformation($"User search for {id}");
-
             User user;
-            var jsonClaimData = await _cache.StringGetAsync($"user:{id}");
-            if (jsonClaimData.IsNullOrEmpty)
+
+            var jsonClaimData = await _cacheUtility.GetDataFromCachAsync($"user:{id}");
+            if (string.IsNullOrWhiteSpace(jsonClaimData))
             {
                 user = await _userService.GetUser(id);
-                if (user != null)
-                {
-                    var jsonData = JsonSerializer.Serialize(user);
-                    await _cache.StringSetAsync($"user:{id}", jsonData, TimeSpan.FromMinutes(2));
-                }
+
+                await _cacheUtility.SetDataInCachAsync($"user:{id}", user);
             }
             else
             {
@@ -80,28 +82,17 @@ namespace E_Claim_Service.Controllers
             if (userSearchDto.IsEmailVerified != null)
                 claimKey.Append(userSearchDto.IsEmailVerified.ToString());
 
-
-            var jsonClaimData = await _cache.StringGetAsync($"users:{claimKey}");
-            if (jsonClaimData.IsNullOrEmpty)
+            var jsonClaimData = await _cacheUtility.GetDataFromCachAsync($"users:{claimKey}");
+            if (string.IsNullOrWhiteSpace(jsonClaimData))
             {
                 users = await _userService.GetAllUser(userSearchDto);
-                if (users != null)
-                {
-                    var options = new JsonSerializerOptions
-                    {
-                        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
-                        WriteIndented = true
-                    };
 
-                    var jsonData = JsonSerializer.Serialize(users, options);
-                    await _cache.StringSetAsync($"users:{claimKey}", jsonData, TimeSpan.FromMinutes(2));
-                }
+                await _cacheUtility.SetDataInCachAsync($"users:{claimKey}", users);
             }
             else
             {
                 users = JsonSerializer.Deserialize<IEnumerable<User>>(jsonClaimData);
             }
-
 
 
             _logger.LogInformation($"User search response", users);

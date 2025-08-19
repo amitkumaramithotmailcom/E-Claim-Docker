@@ -2,6 +2,7 @@
 using EClaim.Domain.Entities;
 using EClaim.Domain.Enums;
 using EClaim.Domain.Interfaces;
+using EClaim.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -19,12 +20,14 @@ namespace E_Claim_Service.Controllers
         private readonly IClaimService _claimService;
         private readonly ILogger<AuthController> _logger;
         private readonly IDatabase _cache;
+        private readonly ICacheUtility _cacheUtility;
 
-        public ClaimController(IClaimService claimService, ILogger<AuthController> logger, IConnectionMultiplexer redis)
+        public ClaimController(IClaimService claimService, ILogger<AuthController> logger, IConnectionMultiplexer redis, ICacheUtility cacheUtility)
         {
             _claimService = claimService;
             _logger = logger;
-            _cache = redis.GetDatabase(); 
+            _cache = redis.GetDatabase();
+            _cacheUtility = cacheUtility;
         }
 
         [HttpGet]
@@ -33,27 +36,19 @@ namespace E_Claim_Service.Controllers
             _logger.LogInformation($"User claim request search for {id}");
 
             ClaimRequest claimRequest;
-            var jsonClaimData = await _cache.StringGetAsync($"Claim:{id}");
-            if (jsonClaimData.IsNullOrEmpty)
+
+            var jsonData = await _cacheUtility.GetDataFromCachAsync($"Claim:{id}");
+            if (string.IsNullOrWhiteSpace(jsonData))
             {
                 claimRequest = await _claimService.GetClaimSubmission(id);
-                if (claimRequest != null)
-                {
-                    var options = new JsonSerializerOptions
-                    {
-                        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
-                        WriteIndented = true
-                    };
 
-                    var jsonData = JsonSerializer.Serialize(claimRequest, options);
-                    await _cache.StringSetAsync($"Claim:{id}", jsonData, TimeSpan.FromMinutes(2));
-                }
+                await _cacheUtility.SetDataInCachAsync($"Claim:{id}", claimRequest);
             }
             else
             {
-                claimRequest = JsonSerializer.Deserialize<ClaimRequest>(jsonClaimData);
+                claimRequest = JsonSerializer.Deserialize<ClaimRequest>(jsonData);
             }
-            
+
             _logger.LogInformation("User claim request search response", claimRequest);
             return Ok(claimRequest);
         }
@@ -80,27 +75,16 @@ namespace E_Claim_Service.Controllers
                 claimKey.Append(claimSearchDto.ToDate);
             }
 
-
-
-            var jsonClaimData = await _cache.StringGetAsync($"Claims:{claimKey}");
-            if (jsonClaimData.IsNullOrEmpty)
+            var jsonData = await _cacheUtility.GetDataFromCachAsync($"Claims:{claimKey}");
+            if (string.IsNullOrWhiteSpace(jsonData))
             {
                 ClaimRequestList = await _claimService.GetClaimDetails(claimSearchDto);
-                if (ClaimRequestList != null)
-                {
-                    var options = new JsonSerializerOptions
-                    {
-                        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
-                        WriteIndented = true
-                    };
 
-                    var jsonData = JsonSerializer.Serialize(ClaimRequestList, options);
-                    await _cache.StringSetAsync($"Claims:{claimKey}", jsonData, TimeSpan.FromMinutes(2));
-                }
+                await _cacheUtility.SetDataInCachAsync($"Claims:{claimKey}", ClaimRequestList);
             }
             else
             {
-                ClaimRequestList = JsonSerializer.Deserialize<IEnumerable<ClaimRequest>>(jsonClaimData);
+                ClaimRequestList = JsonSerializer.Deserialize<IEnumerable<ClaimRequest>>(jsonData);
             }
 
             _logger.LogInformation("User claim request search response", ClaimRequestList);

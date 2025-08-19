@@ -14,7 +14,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IAuthService, AuthService>()
                 .AddScoped<IClaimService, ClaimService>()
                 .AddScoped<IClaimService, ClaimService>()
-                .AddScoped<IUserService, UserService>();
+                .AddScoped<IUserService, UserService>()
+                 .AddScoped<ICacheUtility, CacheUtility>()
+                .AddScoped<IAppSettingsService, AppSettingsService>(); 
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

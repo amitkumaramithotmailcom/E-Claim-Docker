@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<ClaimRequest> Claims { get; set; }
     public DbSet<ClaimWorkflowStep> ClaimWorkflowSteps { get; set; }
     public DbSet<AppLog> Logs { get; set; }
+    public DbSet<AppSettings> AppSettings { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

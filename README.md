@@ -103,4 +103,6 @@ You need to share the code (without DLLs) on SharePoint and share the link accor
          dotnet ef migrations add <Migration-Name> -p EClaim.Infrastructure -s EClaim.API //command for Create migration.
          dotnet ef database update -p EClaim.Infrastructure -s EClaim.API  //command for update database as per migration.
 
+
+amitkumaramithotmailcom
 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
