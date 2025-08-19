@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   api:
     build: 
@@ -10,7 +12,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__Redis=redis:6379,abortConnect=false,connectTimeout=15000
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     networks:
       - eclaimnet
 
@@ -20,6 +23,11 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     volumes:
       - redis_data:/data
     networks:
