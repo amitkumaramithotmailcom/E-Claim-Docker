@@ -14,7 +14,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copy only the csproj and restore (better caching)
-COPY ["EClaim.API/EClaim.Application.csproj", "EClaim.Application/"]
+COPY ["EClaim.Application/EClaim.Application.csproj", "EClaim.Application/"]
 RUN dotnet restore "EClaim.Application/EClaim.Application.csproj"
 
 # Copy everything else

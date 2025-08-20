@@ -23,10 +23,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/AccessDenied";
     });
-
+var apiBaseUrl = builder.Configuration.GetValue<string>("ApiBaseUrl");
 builder.Services.AddHttpClient("api", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7220/"); // Your API URL
+    client.BaseAddress = new Uri(apiBaseUrl);
 });
 
 builder.Services.AddHttpContextAccessor();
