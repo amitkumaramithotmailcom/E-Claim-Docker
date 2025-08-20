@@ -1,0 +1,20 @@
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: EClaim.Application/EClaim.Application/Dockerfile
+    container_name: eclaim_app
+    ports:
+      - "6000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    restart: always
+    networks:
+      - eclaimnet
+
+networks:
+  eclaimnet:
+
+volumes:
+  redis_data:
