@@ -3,7 +3,7 @@ services:
     build: 
       context: .
       dockerfile: EClaim.API/Dockerfile
-    container_name: eclaim_api
+    container_name: eclaim_api_repo
     ports:
       - "5000:80"
       - "5001:80"
@@ -19,7 +19,7 @@ services:
 
   redis:
     image: redis:7
-    container_name: redis
+    container_name: redis_repo
     restart: always
     ports:
       - "6379:6379"

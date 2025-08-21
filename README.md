@@ -1,108 +1,116 @@
-## E-Claim System (.NET Core)
+## Run eClaimApp, eClaimApi, SQL Server, and Redis in Docker container 
 
----
+### SQL Server image  
 
-## Contents  
-- [Assignment](#assignment)  
-- [Requirement](#requirement)  
-- [Deliverables](#deliverables)  
-- [Bonus Question](#bonus-question)  
+#### 1. Pull MSSQL image
+    $ docker pull mcr.microsoft.com/mssql/server:2022-latest  
 
----
+#### 2. Run MSSQL in container
+    $ docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Amit@123" -p 1433:1433 --name sqlserver -d mcr.microsoft.com/mssql/server:2022-latest
 
-## Assignment  
-Develop a web application for an E-Claim system using ASP.NET Core. The system should handle the submission, processing, tracking, and management of insurance claims. The system caters to various user roles such as claimants, adjusters, and administrators. The application should demonstrate advanced skills in software architecture, security, performance, and modern development practices.
+#### 3. Check SQL Server running status
+    $ docker ps 
 
----
+    Output :
+    CONTAINER ID        IMAGE                                           COMMAND                     CREATED          STATUS                    PORTS                                            NAMES
+    6ed4682938bb        mcr.microsoft.com/mssql/server:2022-latest      "/opt/mssql/bin/laun…"      14 minutes ago   Up 14 minutes             0.0.0.0:1433->1433/tcp, [::]:1433->1433/tcp      sqlserver
 
-## Requirement  
+#### 4. Check Hostname for connect SQL server
+    $ hostname -I
 
-### Business Requirements  
-Build an e-claim application. Key features should be as follows:
-
-#### 1. User Management  
-- Registration and Login (with email verification)  
-- Role-based authorization (Admin, Claimant, Adjuster, Approver)  
-- Profile management  
-
-#### 2. Claim Management  
-Design a user-friendly interface for claim submission with various claim types. Implement a workflow engine to automate claim processing with configurable approval steps based on claim type or severity.  
-- Claim submission (with file uploads for supporting documents)  
-- Claim status tracking  
-- Claim history and details  
-- Workflow for claim review, adjustment, and approval  
-
-#### 3. Notification System  
-Develop notification functionalities for users regarding claim updates, approvals, and required actions.  
-- Email and SMS notifications for claim status updates  
-- Notifications for required actions (e.g., additional documentation)  
-
-#### 4. Reporting  
-- Generate reports on claim statuses, types, and other relevant metrics  
-- Export reports to PDF, Excel, etc.  
-
-#### 5. Payment Integration (optional)  
-- Integrate with payment gateways for claim payouts  
-
-#### 6. Security  
-- **Authentication**: Implement JWT-based authentication  
-- **Authorization**: Implement role-based authorization  
-- **Input Validation**: Validate and sanitize user inputs to prevent SQL Injection, XSS, and other attacks  
-- **Audit Logs**: Track and log all critical actions for auditing purposes  
-
-#### 7. Search and Filtering  
-- Implement search functionality for claims  
-- Filter claims by status, type, date range, etc.  
-
----
-
-### Technical Requirements  
-1. You can use framework/libraries of your choice for user interface design  
-2. Backend of the application should be designed as a **.NET Web API**  
-3. **SQL Server** should be used for storing all the data  
-4. App should be portable  
-   - Database migrations/seed data initialization should be implemented  
-   - Other than changing the host name for SQL server, no additional changes should be required to run the application on a different machine  
-5. **Entity Framework Core** should be used for all database operations  
-6. **Dependency Injection** should be used  
-7. **Global Exception Handling** should be implemented  
-   - Exceptions should be logged to the database  
-8. **Logging** of additional information and warnings should be done in the database  
-9. **Relevant validations** should be implemented and mentioned in the documentation during submission  
-10. Write **unit tests** for critical components using **xUnit**
-
----
-
-## Deliverables  
-You need to share the code (without DLLs) on SharePoint and share the link accordingly. Make sure it is public.
-
-- A well-structured and documented codebase  
-- Unit and integration tests covering core functionalities  
-- Deployment configuration for a chosen cloud platform (optional)  
-- User guides for different roles within the system  
-
----
-
-## Bonus Question  
-**Containerize** the application using **Docker**. Use **Kubernetes** for container orchestration.
-
----
-
-## Steps for run application
-- Step 1 : Open the **E-Claim\E-Claim-Service\E-Claim-Service.sln** file in VS.
-- Step 2 : Open the **E-Claim\EClaim.Application\EClaim.Application.sln** file in VS.
-- Step 4 : Update database connection string in "appsettings.json" file.
-
-         "ConnectionStrings": {
-              "DefaultConnection": "Server=<Server_Name>;Database=<Database_Name>;User ID=<User_Id>;Password=&lt;Password&gt;TrustServerCertificate=True;"
-         }
-- Step 5 : Build the both application.
-- Step 6 : Open the CMD propemt in base folder **E-Claim\E-Claim-Service**.
-- Step 7 : For migration execute the below command.
-
-         dotnet ef migrations add <Migration-Name> -p EClaim.Infrastructure -s EClaim.API //command for Create migration.
-         dotnet ef database update -p EClaim.Infrastructure -s EClaim.API  //command for update database as per migration.
+#### 5. SQL connection details
+    Server: 172.17.221.91,1433
+    Login: SA
+    Password: Amit@123    
 
 
-amitkumaramithotmailcom
-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
+### Redis image   
+
+#### 1. Pull Redis image
+    $ docker pull redis
+
+#### 2. Run Redis in container
+    $ docker run -d --name redis-server -p 6379:6379 -v redis_data:/data redis redis-server --appendonly yes
+
+    Comment:
+	-d → Detached mode (runs in background)
+	--name redis-server → Names the container
+	-p 6379:6379 → Maps Redis port 6379 to localhost:6379
+	redis → The image name
+    -v redis_data:/data → Stores Redis data in a Docker volume
+	--appendonly yes → Enables persistence
+
+#### 3. Check to Redis connection
+    d$ ocker exec -it redis-server redis-cli
+
+    Try for testing:
+		ping
+	Response should be:
+		PONG
+
+## Run backend Application in container
+
+#### 1. Pull app image
+    git clone https://github.com/amitkumaramithotmailcom/E-Claim-Docker.git
+
+#### 2. Move on dockerfile folder
+    $ cd E-Claim-Docker
+    E-Claim-Docker$ cd E-Claim-Service
+    
+#### 3. Run docker build command for docker image
+    $ docker build -t amitkumaramit/eclaim_api -f EClaim.API/Dockerfile .
+
+    Comment:
+    amitkumaramithotmailcom/e-claim-docker : Image Name
+    EClaim.API/Dockerfile : docker file path
+
+    Dockerfile:
+        # Base runtime image
+        FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+        WORKDIR /app
+        EXPOSE 8080
+
+        # Configure Kestrel to listen on port 8080
+        ENV ASPNETCORE_URLS=http://+:8080
+
+        # Build stage
+        FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+        ARG BUILD_CONFIGURATION=Release
+        WORKDIR /src
+
+        # Copy only the csproj and restore (better caching)
+        COPY ["EClaim.API/EClaim.API.csproj", "EClaim.API/"]
+        RUN dotnet restore "EClaim.API/EClaim.API.csproj"
+
+        # Copy everything else
+        COPY . .
+
+        # Build
+        WORKDIR /src/EClaim.API
+        RUN dotnet build "EClaim.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+        # Publish stage
+        FROM build AS publish
+        ARG BUILD_CONFIGURATION=Release
+        RUN dotnet publish "EClaim.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+        # Final runtime image
+        FROM base AS final
+        WORKDIR /app
+        COPY --from=publish /app/publish .
+        ENTRYPOINT ["dotnet", "EClaim.API.dll"]
+
+#### 4. Run backedn application
+    $ docker run -d -p 5000:5000 -e ASPNETCORE_URLS=http://+:5000 amitkumaramit/eclaim_api
+
+#### 5. Check backend app running status
+    $ docker ps 
+
+    Output :
+    CONTAINER ID        IMAGE                           COMMAND                     CREATED          STATUS                    PORTS                                                                                        NAMES
+    6b380631a8c0        amitkumaramit/eclaim_api        "dotnet EClaim.API.d…"      12 minutes ago   Up 12 minutes             8080/tcp, 0.0.0.0:5000->80/tcp, 0.0.0.0:5001->80/tcp, [::]:5000->80/tcp, [::]:5001->80/tcp   eclaim_api
+
+#### 6. App accessable on below port
+    http://172.17.221.91:5000/
+    http://172.17.221.91:5001/
+    http://172.17.221.91:5000/swagger/index.html
