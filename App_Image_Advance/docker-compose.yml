@@ -1,0 +1,19 @@
+services:
+  app:
+    image: amitkumaramit/eclaim_app:1.0
+    container_name: eclaim_app
+    ports:
+      - "5005:81"
+      - "5006:81"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:81
+    restart: always
+    networks:
+      - eclaimnet
+
+networks:
+  eclaimnet:
+
+volumes:
+  redis_data:
