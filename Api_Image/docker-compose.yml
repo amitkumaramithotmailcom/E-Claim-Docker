@@ -1,8 +1,6 @@
-version: "3.9"
-
 services:
   api:
-    image: amitkumaramit/eclaim_api:1.0
+    image: amitkumaramit/eclaim_api:1.1
     container_name: eclaim_api
     ports:
       - "5000:80"

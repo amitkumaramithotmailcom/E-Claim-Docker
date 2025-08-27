@@ -48,7 +48,8 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await DbSeeder.SeedUsersAsync(dbContext);
+    dbContext.Database.Migrate();   // ensures tables like Users, Logs are created
+    await DbSeeder.SeedUsersAsync(dbContext); // safe to run after Migrate()
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>(); // 1. Custom error handling — always FIRST

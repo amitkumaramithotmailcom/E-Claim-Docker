@@ -1,0 +1,24 @@
+-- db-init/init.sql
+
+CREATE DATABASE EClaimAppDb;
+GO
+
+USE EClaimAppDb;
+GO
+
+CREATE TABLE Users (
+    Id INT IDENTITY PRIMARY KEY,
+    Email NVARCHAR(4000) NOT NULL,
+    PasswordHash NVARCHAR(4000) NOT NULL,
+    Role NVARCHAR(50) NOT NULL
+);
+GO
+
+CREATE TABLE Logs (
+    Id INT IDENTITY PRIMARY KEY,
+    Category NVARCHAR(255),
+    Level NVARCHAR(50),
+    Message NVARCHAR(MAX),
+    Timestamp DATETIME2
+);
+GO
